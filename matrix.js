@@ -26,12 +26,12 @@ export class Matrix {
     this.array = new Float32Array(array);
   }
 
-  assign(matrix) {
-    this.array.set(matrix.array);
-  }
-
   reset() {
     this.assign(Matrix.identity);
+  }
+
+  assign(matrix) {
+    this.array.set(matrix.array);
   }
 
   get(row, col) {
@@ -79,41 +79,33 @@ export class Matrix {
     Matrix.releaseTemp(1);
   }
 
-  multiplyVectorRight(array) {
+  multiplyVectorRight(vector) {
     let x = 0;
     let y = 0;
     let z = 0;
     let w = 0;
     for (let i = 0; i < 4; ++i) {
-      x += this.get(0, i) * array[i];
-      y += this.get(1, i) * array[i];
-      z += this.get(2, i) * array[i];
-      w += this.get(3, i) * array[i];
+      x += this.get(0, i) * vector.array[i];
+      y += this.get(1, i) * vector.array[i];
+      z += this.get(2, i) * vector.array[i];
+      w += this.get(3, i) * vector.array[i];
     }
-    array[0] = x;
-    array[1] = y;
-    array[2] = z;
-    array[3] = w;
+    vector.x = x;
+    vector.y = y;
+    vector.z = z;
+    vector.w = w;
   }
 
   translate(x, y, z) {
-    const translate = Matrix.getTemp();
-    translate.reset();
-    translate.set(0, 3, x);
-    translate.set(1, 3, y);
-    translate.set(2, 3, z);
-    this.multiplyLeft(translate);
-    Matrix.releaseTemp(1);
+    this.array[0 * 4 + 3] += x;
+    this.array[1 * 4 + 3] += y;
+    this.array[2 * 4 + 3] += z;
   }
 
   scale(x, y, z) {
-    const scale = Matrix.getTemp();
-    scale.reset();
-    scale.set(0, 0, x);
-    scale.set(1, 1, y);
-    scale.set(2, 2, z);
-    this.multiplyLeft(scale);
-    Matrix.releaseTemp(1);
+    this.array[0 * 4 + 0] *= x;
+    this.array[1 * 4 + 1] *= y;
+    this.array[2 * 4 + 2] *= z;
   }
 
   rotateZ(angle) {
@@ -159,15 +151,15 @@ export class Matrix {
     Matrix.releaseTemp(1);
   }
 
-  frustrum(zNear, zFar, zRatio) {
-    const sideLength = zNear * zRatio;
+  frustum(zNear, zFar, zViewportRatio) {
+    const sideLength = zNear * zViewportRatio;
     const perspective = zFar / zNear;
     const zLength = zFar - zNear;
 
     const temp = Matrix.getTemp();
     temp.reset();
-    temp.set(0, 0, 1 / sideLength)
-    temp.set(1, 1, 1 / sideLength)
+    temp.set(0, 0, 2 / sideLength)
+    temp.set(1, 1, 2 / sideLength)
     // [z, 1] -> [z', w']
     // [-n, 1] -> [1, 1]
     // [-f, 1] -> [-p, p]

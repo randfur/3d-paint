@@ -24,7 +24,8 @@ export class Surface {
     this.transform = new Matrix();
     this.transform.scale(this.canvas.width, this.canvas.height, 1);
     this.transform.rotateY(random(TAU));
-    this.transform.translate(deviate(1000), deviate(100), -100-random(1000));
+
+    this.position = [deviate(1000), deviate(100), -100-random(1000)];
 
     this.uploadTexture();
   }
@@ -41,7 +42,13 @@ export class Surface {
   draw() {
     gl.useProgram(program);
     gl.bindTexture(gl.TEXTURE_2D, this.texture);
-    gl.uniformMatrix4fv(surfaceTransformLocation, true, this.transform.array);
+
+    const transform = Matrix.getTemp();
+    transform.assign(this.transform);
+    transform.translate(this.position[0], this.position[1], this.position[2]);
+    gl.uniformMatrix4fv(surfaceTransformLocation, true, transform.array);
+    Matrix.releaseTemp(1);
+
     gl.drawArrays(gl.TRIANGLE_FAN, 0, 4);
   }
 }

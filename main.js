@@ -1,31 +1,33 @@
 import {TAU, width, height, gl} from './util.js';
+import {mouseDown, mouseX, mouseY} from './mouse.js';
 import {Surface} from './surface.js';
 import {Matrix} from './matrix.js';
+import {Camera} from './camera.js';
 
 let camera = null;
 let surfaces = null;
-let mouseX = 0;
-let mouseY = 0;
 
-window.addEventListener('error', event => {
-  window.output.textContent = event.error.stack;
-});
 
-let mouseDown = false;
-window.addEventListener('mousedown', event => {
-  mouseDown = true;
-  paint(event.clientX, event.clientY);
-});
-window.addEventListener('mouseup', () => {
-  mouseDown = false;
-});
+function debuggingInit() {
+  window.addEventListener('error', event => {
+    window.output.textContent = event.error.stack;
+  });
+}
+
+function debuggingDone() {
+  Object.assign(window, {
+    gl,
+    Matrix,
+    camera,
+    surfaces,
+  });
+  console.log('all good');
+}
+
 window.addEventListener('mousemove', event => {
-  if (!mouseDown) {
-    return;
+  if (mouseDown) {
+    paint(mouseX, mouseY);
   }
-  mouseX = event.clientX;
-  mouseY = event.clientY;
-  paint(mouseX, mouseY);
 });
 
 function paint(x, y) {
@@ -42,12 +44,7 @@ function paint(x, y) {
 function draw() {
   gl.clear(gl.COLOR_BUFFER_BIT);
 
-  camera.reset();
-  camera.translate(width / 2 - mouseX, -300, 1000 - mouseY * 10);
-  // camera.rotateX(TAU * 0.05);
-  camera.frustrum(1, 10000, 0.5);
-  camera.scale(height / width, 1, 1);
-  Surface.setCameraTransform(camera);
+  Surface.setCameraTransform(camera.transform);
 
   for (const surface of surfaces) {
     surface.draw();
@@ -55,7 +52,13 @@ function draw() {
 }
 
 function main() {
-  camera = new Matrix();
+  debuggingInit();
+
+  camera = new Camera();
+  camera.position.set(0, 200, 300);
+  camera.angleX = TAU * 0.05;
+  camera.updateTransform();
+
   surfaces = [
     new Surface(),
     new Surface(),
@@ -72,12 +75,6 @@ function main() {
 
   draw();
 
-  Object.assign(window, {
-    Matrix,
-    camera,
-    gl,
-    surfaces,
-  });
-  console.log('all good');
+  debuggingDone();
 }
 main();
