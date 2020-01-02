@@ -1,6 +1,4 @@
-const originArray = new Float32Array([
-  0, 0, 0, 1,
-]);
+const originArray = new Float32Array([0, 0, 0]);
 
 export class Vector {
   static origin = new Vector();
@@ -9,6 +7,9 @@ export class Vector {
   static nextTemp = 0;
 
   static getTemp() {
+    if (Vector.nextTemp > 100) {
+      throw 'too many temps';
+    }
     while (Vector.nextTemp >= Vector.temps.length) {
       Vector.temps.push(new Vector());
     }
@@ -19,16 +20,8 @@ export class Vector {
     Vector.nextTemp -= n;
   }
 
-  constructor(x=0, y=0, z=0, w=1) {
-    this.array = new Float32Array([x, y, z, w]);
-  }
-
-  assign(other) {
-    this.array.set(other.array);
-  }
-
-  reset() {
-    this.assign(Vector.origin);
+  constructor(x=0, y=0, z=0) {
+    this.array = new Float32Array([x, y, z]);
   }
 
   get x() {
@@ -55,9 +48,46 @@ export class Vector {
     this.array[2] = value;
   }
 
+  assign(other) {
+    this.array.set(other.array);
+  }
+
+  reset() {
+    this.set(0, 0, 0);
+  }
+
   set(x, y, z) {
     this.array[0] = x;
     this.array[1] = y;
     this.array[2] = z;
+  }
+
+  scale(k) {
+    this.array[0] *= k;
+    this.array[1] *= k;
+    this.array[2] *= k;
+  }
+
+  add(x, y, z) {
+    this.array[0] += x;
+    this.array[1] += y;
+    this.array[2] += z;
+  }
+
+  sumWith(kThis, other, kOther) {
+    this.array[0] = kThis * this.array[0] + kOther * other.array[0];
+    this.array[1] = kThis * this.array[1] + kOther * other.array[1];
+    this.array[2] = kThis * this.array[2] + kOther * other.array[2];
+  }
+
+  dot(other) {
+    return (
+        this.array[0] * other.array[0] +
+        this.array[1] * other.array[1] +
+        this.array[2] * other.array[2]);
+  }
+
+  normalise() {
+    this.scale(1 / Math.sqrt(this.dot(this)));
   }
 }

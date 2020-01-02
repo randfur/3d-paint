@@ -1,20 +1,28 @@
 import {TAU, gl, logIf, width, height, random, deviate} from './util.js';
+import {Vector} from './vector.js';
 import {Matrix} from './matrix.js';
 
 const surfaceWidth = 400;
 const surfaceHeight = 400;
 
 let program = null;
+let colourLocation = null;
 let cameraTransformLocation = null;
 let surfaceTransformLocation = null;
 
 export class Surface {
+  static setCameraTransform(transform) {
+    gl.uniformMatrix4fv(cameraTransformLocation, true, transform.array);
+  }
+
   constructor() {
     this.canvas = document.createElement('canvas');
     this.canvas.width = surfaceWidth;
     this.canvas.height = surfaceHeight;
 
     this.context = this.canvas.getContext('2d');
+
+    this.colour = new Float32Array([random(1), random(1), random(1)]);
 
     this.texture = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, this.texture);
@@ -24,14 +32,28 @@ export class Surface {
     this.transform = new Matrix();
     this.transform.scale(this.canvas.width, this.canvas.height, 1);
     this.transform.rotateY(random(TAU));
+    this.xAxis = new Vector(1, 0, 0);
+    this.yAxis = new Vector(0, 1, 0);
+    this.zAxis = new Vector(0, 0, 1);
+    this.updateTransform();
 
-    this.position = [deviate(1000), deviate(100), -100-random(1000)];
+    this.position = new Vector(deviate(1000), deviate(100), -100-random(1000));
 
     this.uploadTexture();
   }
 
-  static setCameraTransform(transform) {
-    gl.uniformMatrix4fv(cameraTransformLocation, true, transform.array);
+  updateTransform() {
+    this.xAxis.set(1, 0, 0);
+    this.transform.multiplyVectorRight(this.xAxis);
+    this.xAxis.normalise();
+
+    this.yAxis.set(0, 1, 0);
+    this.transform.multiplyVectorRight(this.yAxis);
+    this.yAxis.normalise();
+
+    this.zAxis.set(0, 0, 1);
+    this.transform.multiplyVectorRight(this.zAxis);
+    this.zAxis.normalise();
   }
 
   uploadTexture() {
@@ -39,13 +61,46 @@ export class Surface {
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.ALPHA, gl.ALPHA, gl.UNSIGNED_BYTE, this.canvas);
   }
 
+  hitTest(rayPosition, rayDirection, outCanvasPosition) {
+    // ray point = P + t * D
+    // surface position = S
+    // surface normal = N
+    // ((P + t * D) - S) . N = 0
+    // P.N + t * D.N - S.N = 0
+    // t = (S.N - P.N) / D.N
+    const dDotN = rayDirection.dot(this.zAxis);
+    if (dDotN == 0) {
+      return null;
+    }
+
+    const t = (this.position.dot(this.zAxis) - rayPosition.dot(this.zAxis)) / dDotN;
+    if (t <= 0) {
+      return null;
+    }
+
+    const hitPosition = Vector.getTemp();
+    hitPosition.assign(rayPosition);
+    hitPosition.sumWith(1, rayDirection, t);
+    hitPosition.sumWith(1, this.position, -1);
+    const x = hitPosition.dot(this.xAxis);
+    const y = hitPosition.dot(this.yAxis);
+    Vector.releaseTemp(1);
+    if (Math.abs(x) <= this.canvas.width / 2 && Math.abs(y) <= this.canvas.height / 2) {
+      outCanvasPosition.set(x + this.canvas.width / 2, y + this.canvas.height / 2, 0);
+      return t;
+    }
+    return null;
+  }
+
   draw() {
     gl.useProgram(program);
     gl.bindTexture(gl.TEXTURE_2D, this.texture);
 
+    gl.uniform3fv(colourLocation, this.colour);
+
     const transform = Matrix.getTemp();
     transform.assign(this.transform);
-    transform.translate(this.position[0], this.position[1], this.position[2]);
+    transform.translate(this.position.x, this.position.y, this.position.z);
     gl.uniformMatrix4fv(surfaceTransformLocation, true, transform.array);
     Matrix.releaseTemp(1);
 
@@ -80,15 +135,15 @@ function init() {
   gl.shaderSource(fragmentShader, `#version 300 es
   precision mediump float;
 
+  uniform vec3 colour;
   uniform sampler2D sampler;
 
   in vec2 fragPos;
-  in vec3 fragCol;
 
   out vec4 col;
 
   void main() {
-    col = texture(sampler, fragPos) + vec4(0, 0, 0, 0.5);
+    col = texture(sampler, fragPos).a * vec4(colour, 1) + vec4(0, 0, 0, 0.25);
     // col = vec4(0, 0, 0, 1);
   }
   `);
@@ -100,6 +155,7 @@ function init() {
   logIf(gl.getProgramInfoLog(program))
   gl.useProgram(program);
 
+  colourLocation = gl.getUniformLocation(program, 'colour');
   cameraTransformLocation = gl.getUniformLocation(program, 'cameraTransform');
   gl.uniformMatrix4fv(cameraTransformLocation, false, Matrix.identity.array);
   surfaceTransformLocation = gl.getUniformLocation(program, 'surfaceTransform');

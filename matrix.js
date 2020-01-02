@@ -12,6 +12,9 @@ export class Matrix {
   static nextTemp = 0;
 
   static getTemp() {
+    if (Matrix.nextTemp > 100) {
+      throw 'too many temps';
+    }
     while (Matrix.nextTemp >= Matrix.temps.length) {
       Matrix.temps.push(new Matrix());
     }
@@ -83,17 +86,14 @@ export class Matrix {
     let x = 0;
     let y = 0;
     let z = 0;
-    let w = 0;
-    for (let i = 0; i < 4; ++i) {
+    for (let i = 0; i < 3; ++i) {
       x += this.get(0, i) * vector.array[i];
       y += this.get(1, i) * vector.array[i];
       z += this.get(2, i) * vector.array[i];
-      w += this.get(3, i) * vector.array[i];
     }
-    vector.x = x;
-    vector.y = y;
-    vector.z = z;
-    vector.w = w;
+    vector.x = x + this.get(0, 3);
+    vector.y = y + this.get(1, 3);
+    vector.z = z + this.get(2, 3);
   }
 
   translate(x, y, z) {

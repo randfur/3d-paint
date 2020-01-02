@@ -1,4 +1,5 @@
 import {logIf, TAU, width, height} from './util.js';
+import {mouseX, mouseY} from './mouse.js';
 import {Matrix} from './matrix.js';
 import {Vector} from './vector.js';
 
@@ -14,7 +15,6 @@ export class Camera {
 
     this.transform = new Matrix();
     this.updateTransform();
-    logIf(this.transform)
   }
 
   updateTransform() {
@@ -25,8 +25,8 @@ export class Camera {
       -this.position.z,
     );
 
-    this.transform.rotateY(this.angleY);
-    this.transform.rotateX(this.angleX);
+    this.transform.rotateY(-this.angleY);
+    this.transform.rotateX(-this.angleX);
 
     this.transform.frustum(this.zNear, this.zFar, this.zViewportRatio);
     if (width > height) {
@@ -37,6 +37,10 @@ export class Camera {
   }
 
   getMouseDirection(outVector) {
-
+    const minScreenSide = Math.min(width, height);
+    outVector.set(
+        this.zViewportRatio * (mouseX - width / 2) / minScreenSide,
+        this.zViewportRatio * (height / 2 - mouseY) / minScreenSide,
+        -1);
   }
 }

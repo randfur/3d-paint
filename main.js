@@ -2,11 +2,12 @@ import {TAU, width, height, gl} from './util.js';
 import {mouseDown, mouseX, mouseY} from './mouse.js';
 import {Surface} from './surface.js';
 import {Matrix} from './matrix.js';
+import {Vector} from './vector.js';
 import {Camera} from './camera.js';
 
 let camera = null;
 let surfaces = null;
-
+let selectedSurface = null;
 
 function debuggingInit() {
   window.addEventListener('error', event => {
@@ -24,21 +25,40 @@ function debuggingDone() {
   console.log('all good');
 }
 
-window.addEventListener('mousemove', event => {
-  if (mouseDown) {
-    paint(mouseX, mouseY);
-  }
-});
+function registerEvents() {
+  window.addEventListener('mousedown', event => {
+    const mouseDirection = Vector.getTemp();
+    const canvasPosition = Vector.getTemp();
+    camera.getMouseDirection(mouseDirection);
+    let smallestT = Infinity;
+    selectedSurface = null;
+    for (const surface of surfaces) {
+      const t = surface.hitTest(camera.position, mouseDirection, canvasPosition);
+      if (t !== null && t < smallestT) {
+        selectedSurface = surface;
+        smallestT = t;
+      }
+    }
+    Vector.releaseTemp(2);
+  });
 
-function paint(x, y) {
-  // x = x * 2 / width - 1;
-  // y = 1 - y * 2 / height;
-  y = height - y;
-  const surface = surfaces[0];
-  surface.context.fillStyle = 'black';
-  surface.context.fillRect(Math.round(x), Math.round(y), 10, 10);
-  surface.uploadTexture();
-  draw();
+  window.addEventListener('mousemove', event => {
+    if (!mouseDown || !selectedSurface) {
+      return;
+    }
+    const mouseDirection = Vector.getTemp();
+    const canvasPosition = Vector.getTemp();
+    camera.getMouseDirection(mouseDirection);
+    if (selectedSurface.hitTest(camera.position, mouseDirection, canvasPosition) !== null) {
+      selectedSurface.context.fillRect(
+          Math.round(canvasPosition.x) - 5,
+          Math.round(canvasPosition.y) - 5,
+          10, 10);
+      selectedSurface.uploadTexture();
+      draw();
+    }
+    Vector.releaseTemp(2);
+  });
 }
 
 function draw() {
@@ -56,7 +76,7 @@ function main() {
 
   camera = new Camera();
   camera.position.set(0, 200, 300);
-  camera.angleX = TAU * 0.05;
+  // camera.angleX = -TAU * 0.05;
   camera.updateTransform();
 
   surfaces = [
@@ -72,6 +92,8 @@ function main() {
     new Surface(),
     new Surface(),
   ];
+
+  registerEvents();
 
   draw();
 
