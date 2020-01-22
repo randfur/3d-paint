@@ -1,29 +1,14 @@
-import {TAU, width, height, gl} from './util.js';
+import {TAU, width, height, gl, range} from './util.js';
 import {mouseDown, mouseX, mouseY} from './mouse.js';
 import {Surface} from './surface.js';
 import {Matrix} from './matrix.js';
 import {Vector} from './vector.js';
 import {Camera} from './camera.js';
+import {Debug} from './debug.js';
 
 let camera = null;
 let surfaces = null;
 let selectedSurface = null;
-
-function debuggingInit() {
-  window.addEventListener('error', event => {
-    window.output.textContent = event.error.stack;
-  });
-}
-
-function debuggingDone() {
-  Object.assign(window, {
-    gl,
-    Matrix,
-    camera,
-    surfaces,
-  });
-  console.log('all good');
-}
 
 function registerEvents() {
   window.addEventListener('mousedown', event => {
@@ -72,31 +57,24 @@ function draw() {
 }
 
 function main() {
-  debuggingInit();
+  Debug.init();
 
   camera = new Camera();
   camera.position.set(0, 200, 300);
   // camera.angleX = -TAU * 0.05;
   camera.updateTransform();
 
-  surfaces = [
-    new Surface(),
-    new Surface(),
-    new Surface(),
-    new Surface(),
-    new Surface(),
-    new Surface(),
-    new Surface(),
-    new Surface(),
-    new Surface(),
-    new Surface(),
-    new Surface(),
-  ];
+  surfaces = range(10).map(_ => new Surface());
 
   registerEvents();
 
   draw();
 
-  debuggingDone();
+  Debug.done({
+    gl,
+    Matrix,
+    camera,
+    surfaces,
+  });
 }
 main();
