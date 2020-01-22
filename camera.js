@@ -1,46 +1,72 @@
 import {logIf, TAU, width, height} from './util.js';
-import {mouseX, mouseY} from './mouse.js';
+import {Cursor} from './cursor.js';
 import {Matrix} from './matrix.js';
 import {Vector} from './vector.js';
 
+let listeners = [];
+
 export class Camera {
-  constructor() {
-    this.position = new Vector();
-    this.angleX = 0;
-    this.angleY = 0;
+  static position = new Vector();
+  static angleX = 0;
+  static angleY = 0;
 
-    this.zNear = 1;
-    this.zFar = 10000;
-    this.zViewportRatio = 2;
+  static zNear = 1;
+  static zFar = 10000;
+  static zViewportRatio = 2;
 
-    this.transform = new Matrix();
-    this.updateTransform();
-  }
+  static transform = new Matrix();
 
-  updateTransform() {
-    this.transform.reset();
-    this.transform.translate(
-      -this.position.x,
-      -this.position.y,
-      -this.position.z,
+
+  static updateTransform() {
+    Camera.transform.reset();
+    Camera.transform.translate(
+      -Camera.position.x,
+      -Camera.position.y,
+      -Camera.position.z,
     );
 
-    this.transform.rotateY(-this.angleY);
-    this.transform.rotateX(-this.angleX);
+    Camera.transform.rotateY(-Camera.angleY);
+    Camera.transform.rotateX(-Camera.angleX);
 
-    this.transform.frustum(this.zNear, this.zFar, this.zViewportRatio);
+    Camera.transform.frustum(Camera.zNear, Camera.zFar, Camera.zViewportRatio);
     if (width > height) {
-      this.transform.scale(height / width, 1, 1);
+      Camera.transform.scale(height / width, 1, 1);
     } else {
-      this.transform.scale(1, width / height, 1);
+      Camera.transform.scale(1, width / height, 1);
     }
   }
 
-  getMouseDirection(outVector) {
+  static addListener(listener) {
+    listeners.push(listener);
+  }
+
+  static getCursorDirection(outVector) {
     const minScreenSide = Math.min(width, height);
     outVector.set(
-        this.zViewportRatio * (mouseX - width / 2) / minScreenSide,
-        this.zViewportRatio * (height / 2 - mouseY) / minScreenSide,
+        Camera.zViewportRatio * (Cursor.x - width / 2) / minScreenSide,
+        Camera.zViewportRatio * (height / 2 - Cursor.y) / minScreenSide,
         -1);
   }
+
+  static onCursorDown() {
+    const rayDirection = Vector.getTemp();
+    Camera.getCursorDirection(rayDirection);
+    for (const listener of listeners) {
+      listener.onCursorRayDown(Camera.position, rayDirection);
+    }
+    Vector.releaseTemp(1);
+  }
+
+  static onCursorMove() {
+    const rayDirection = Vector.getTemp();
+    Camera.getCursorDirection(rayDirection);
+    for (const listener of listeners) {
+      listener.onCursorRayMove(Camera.position, rayDirection);
+    }
+    Vector.releaseTemp(1);
+  }
+
+  static onCursorUp() {}
 }
+
+Camera.updateTransform();
