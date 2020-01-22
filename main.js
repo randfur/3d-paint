@@ -7,12 +7,11 @@ import {Camera} from './camera.js';
 import {Debug} from './debug.js';
 
 function init() {
-  Camera.position.set(0, 200, 300);
-  // Camera.angleX = -TAU * 0.05;
+  Camera.position.set(0, 0, 300);
+  Camera.angleX = -TAU * 0.01;
   Camera.updateTransform();
 
   Surface.init();
-
   Surface.all = range(10).map(_ => new Surface());
 }
 

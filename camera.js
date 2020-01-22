@@ -16,7 +16,6 @@ export class Camera {
 
   static transform = new Matrix();
 
-
   static updateTransform() {
     Camera.transform.reset();
     Camera.transform.translate(
@@ -68,5 +67,3 @@ export class Camera {
 
   static onCursorUp() {}
 }
-
-Camera.updateTransform();
