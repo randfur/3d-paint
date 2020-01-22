@@ -151,14 +151,14 @@ export class Surface {
     this.xAxis = new Vector(1, 0, 0);
     this.yAxis = new Vector(0, 1, 0);
     this.zAxis = new Vector(0, 0, 1);
-    this.updateTransform();
+    this.transformUpdated();
 
     this.position = new Vector(deviate(1000), deviate(100), -100-random(1000));
 
     this.uploadTexture();
   }
 
-  updateTransform() {
+  transformUpdated() {
     this.xAxis.set(1, 0, 0);
     this.transform.multiplyVectorRight(this.xAxis);
     this.xAxis.normalise();

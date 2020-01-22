@@ -14,6 +14,12 @@ function init() {
 
   Surface.init();
   Surface.all = range(10).map(_ => new Surface());
+
+  const surface = Surface.all[0];
+  surface.transform.reset();
+  surface.transform.scale(surface.canvas.width, surface.canvas.height, 1);
+  surface.transformUpdated();
+  surface.position.set(0, 0, 0);
 }
 
 function registerEvents() {
