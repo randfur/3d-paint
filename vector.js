@@ -90,4 +90,22 @@ export class Vector {
   normalise() {
     this.scale(1 / Math.sqrt(this.dot(this)));
   }
+
+  rotateX(angle) {
+    const cos = Math.cos(angle);
+    const sin = Math.sin(angle);
+    this.set(
+        this.x,
+        this.y * cos - this.z * sin,
+        this.y * sin + this.z * cos);
+  }
+
+  rotateY(angle) {
+    const cos = Math.cos(angle);
+    const sin = Math.sin(angle);
+    this.set(
+        this.z * sin + this.x * cos,
+        this.y,
+        this.z * cos - this.x * sin);
+  }
 }

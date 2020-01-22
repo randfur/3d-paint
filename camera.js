@@ -45,6 +45,8 @@ export class Camera {
         Camera.zViewportRatio * (Cursor.x - width / 2) / minScreenSide,
         Camera.zViewportRatio * (height / 2 - Cursor.y) / minScreenSide,
         -1);
+    outVector.rotateX(Camera.angleX);
+    outVector.rotateY(Camera.angleY);
   }
 
   static onCursorDown() {

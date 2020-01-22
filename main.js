@@ -8,7 +8,8 @@ import {Debug} from './debug.js';
 
 function init() {
   Camera.position.set(0, 0, 300);
-  Camera.angleX = -TAU * 0.01;
+  Camera.angleY = TAU * 0.05;
+  Camera.angleX = -TAU * 0.05;
   Camera.updateTransform();
 
   Surface.init();
