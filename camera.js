@@ -64,7 +64,8 @@ export class Camera {
   }
 
   static onFrame(delta, time) {
-    Camera.position.z = Math.cos(time / 1000) * 400;
+    Camera.position.y = 150 + Math.cos(time / 500) * 100;
+    Camera.position.z = 100 + Math.cos(time / 1000) * 400;
     Camera.updateTransform();
     Frames.scheduleRedraw();
   }
