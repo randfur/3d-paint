@@ -151,15 +151,16 @@ export class Matrix {
     Matrix.releaseTemp(1);
   }
 
-  frustum(zNear, zFar, zViewportRatio) {
-    const sideLength = zNear * zViewportRatio;
-    const perspective = zFar / zNear;
+  frustum(zNear, zFar, zViewportRatio, xyRatio) {
+    const xLength = (xyRatio > 1 ? xyRatio : 1) * zNear * zViewportRatio;
+    const yLength = (xyRatio > 1 ? 1 : (1 / xyRatio)) * zNear * zViewportRatio;
     const zLength = zFar - zNear;
+    const perspective = zFar / zNear;
 
     const temp = Matrix.getTemp();
     temp.reset();
-    temp.set(0, 0, 2 / sideLength)
-    temp.set(1, 1, 2 / sideLength)
+    temp.set(0, 0, 2 / xLength)
+    temp.set(1, 1, 2 / yLength)
     // [z, 1] -> [z', w']
     // [-n, 1] -> [1, 1]
     // [-f, 1] -> [-p, p]

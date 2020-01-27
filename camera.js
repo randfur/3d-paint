@@ -27,12 +27,7 @@ export class Camera {
     Camera.transform.rotateY(-Camera.angleY);
     Camera.transform.rotateX(-Camera.angleX);
 
-    Camera.transform.frustum(Camera.zNear, Camera.zFar, Camera.zViewportRatio);
-    if (width > height) {
-      Camera.transform.scale(height / width, 1, 1);
-    } else {
-      Camera.transform.scale(1, width / height, 1);
-    }
+    Camera.transform.frustum(Camera.zNear, Camera.zFar, Camera.zViewportRatio, width / height);
   }
 
   static addListener(listener) {

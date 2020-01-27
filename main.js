@@ -19,7 +19,7 @@ function init() {
   surface.transform.reset();
   surface.transform.scale(surface.canvas.width, surface.canvas.height, 1);
   surface.transformUpdated();
-  surface.position.set(0, 0, 0);
+  surface.position.set(-200, -115, 0);
 }
 
 function registerEvents() {
@@ -49,6 +49,7 @@ function main() {
 
   Debug.done({
     gl,
+    Vector,
     Matrix,
     Camera,
     Surface,
