@@ -1,3 +1,5 @@
+import {maybeCall} from './util.js';
+
 const listeners = [];
 
 export class Keys {
@@ -10,14 +12,14 @@ export class Keys {
   static onDown({key}) {
     Keys.isDown[key] = true;
     for (const listener of listeners) {
-      listener.onKeyDown?.(key);
+      maybeCall(listener.onKeyDown, key);
     }
   }
 
   static onUp({key}) {
     Keys.isDown[key] = false;
     for (const listener of listeners) {
-      listener.onKeyUp?.(key);
+      maybeCall(listener.onKeyUp, key);
     }
   }
 }

@@ -29,3 +29,9 @@ export function range(n) {
   }
   return result;
 }
+
+export function maybeCall(f, ...args) {
+  if (f) {
+    f(...args);
+  }
+}

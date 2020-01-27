@@ -1,4 +1,4 @@
-import {logIf, TAU, width, height} from './util.js';
+import {logIf, TAU, width, height, maybeCall} from './util.js';
 import {Cursor} from './cursor.js';
 import {Frames} from './frames.js';
 import {Matrix} from './matrix.js';
@@ -49,7 +49,7 @@ export class Camera {
     const rayDirection = Vector.getTemp();
     Camera.getCursorDirection(rayDirection);
     for (const listener of listeners) {
-      listener.onCursorRayDown?.(Camera.position, rayDirection);
+      maybeCall(listener.onCursorRayDown, Camera.position, rayDirection);
     }
     Vector.releaseTemp(1);
   }
@@ -58,7 +58,7 @@ export class Camera {
     const rayDirection = Vector.getTemp();
     Camera.getCursorDirection(rayDirection);
     for (const listener of listeners) {
-      listener.onCursorRayMove(Camera.position, rayDirection);
+      maybeCall(listener.onCursorRayMove, Camera.position, rayDirection);
     }
     Vector.releaseTemp(1);
   }

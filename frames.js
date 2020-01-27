@@ -1,3 +1,5 @@
+import {maybeCall} from './util.js';
+
 const listeners = [];
 
 export class Frames {
@@ -16,12 +18,12 @@ export class Frames {
     const delta = newTime - Frames.time;
     Frames.time = newTime;
     for (const listener of listeners) {
-      listener.onFrame?.(delta, Frames.time);
+      maybeCall(listener.onFrame, delta, Frames.time);
     }
 
     if (Frames.redrawScheduled) {
       for (const listener of listeners) {
-        listener.onRedraw?.();
+        maybeCall(listener.onRedraw);
       }
       Frames.redrawScheduled = false;
     }
