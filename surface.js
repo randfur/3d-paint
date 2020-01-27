@@ -2,6 +2,7 @@ import {TAU, gl, logIf, width, height, random, deviate} from './util.js';
 import {Vector} from './vector.js';
 import {Cursor} from './cursor.js';
 import {Matrix} from './matrix.js';
+import {Frames} from './frames.js';
 
 const surfaceWidth = 400;
 const surfaceHeight = 400;
@@ -117,9 +118,7 @@ export class Surface {
           Math.round(canvasPosition.y) - 5,
           10, 10);
       selected.uploadTexture();
-      for (const listener of listeners) {
-        listener.onRedrawRequired();
-      }
+      Frames.scheduleRedraw();
     }
     Vector.releaseTemp(1);
   }

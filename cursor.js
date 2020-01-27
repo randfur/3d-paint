@@ -17,7 +17,7 @@ export class Cursor {
     Cursor.x = event.clientX;
     Cursor.y = event.clientY;
     for (const listener of listeners) {
-      listener.onCursorDown();
+      listener.onCursorDown?.();
     }
   }
 
@@ -26,7 +26,7 @@ export class Cursor {
     Cursor.x = event.clientX;
     Cursor.y = event.clientY;
     for (const listener of listeners) {
-      listener.onCursorUp();
+      listener.onCursorUp?.();
     }
   }
 
@@ -34,7 +34,7 @@ export class Cursor {
     Cursor.x = event.clientX;
     Cursor.y = event.clientY;
     for (const listener of listeners) {
-      listener.onCursorMove();
+      listener.onCursorMove?.();
     }
   }
 }

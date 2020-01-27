@@ -1,5 +1,6 @@
 import {logIf, TAU, width, height} from './util.js';
 import {Cursor} from './cursor.js';
+import {Frames} from './frames.js';
 import {Matrix} from './matrix.js';
 import {Vector} from './vector.js';
 
@@ -48,7 +49,7 @@ export class Camera {
     const rayDirection = Vector.getTemp();
     Camera.getCursorDirection(rayDirection);
     for (const listener of listeners) {
-      listener.onCursorRayDown(Camera.position, rayDirection);
+      listener.onCursorRayDown?.(Camera.position, rayDirection);
     }
     Vector.releaseTemp(1);
   }
@@ -62,5 +63,9 @@ export class Camera {
     Vector.releaseTemp(1);
   }
 
-  static onCursorUp() {}
+  static onFrame(delta, time) {
+    Camera.position.z = Math.cos(time / 1000) * 300;
+    Camera.updateTransform();
+    Frames.scheduleRedraw();
+  }
 }
