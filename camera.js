@@ -1,5 +1,6 @@
 import {logIf, TAU, width, height, maybeCall} from './util.js';
 import {Cursor} from './cursor.js';
+import {Keys} from './keys.js';
 import {Frames} from './frames.js';
 import {Matrix} from './matrix.js';
 import {Vector} from './vector.js';
@@ -16,8 +17,23 @@ export class Camera {
   static zViewportRatio = 2;
 
   static transform = new Matrix();
+  static orientation = new Matrix();
+  static forward = new Vector();
+  static right = new Vector();
+  static up = new Vector();
 
   static updateTransform() {
+    Camera.orientation.reset();
+    Camera.orientation.rotateX(Camera.angleX);
+    Camera.orientation.rotateY(Camera.angleY);
+
+    Camera.forward.set(0, 0, -1);
+    Camera.right.set(1, 0, 0);
+    Camera.up.set(0, 1, 0);
+    Camera.orientation.multiplyVectorRight(Camera.forward);
+    Camera.orientation.multiplyVectorRight(Camera.right);
+    Camera.orientation.multiplyVectorRight(Camera.up);
+
     Camera.transform.reset();
     Camera.transform.translate(
       -Camera.position.x,
@@ -64,8 +80,27 @@ export class Camera {
   }
 
   static onFrame(delta, time) {
-    Camera.position.y = 150 + Math.cos(time / 500) * 100;
-    Camera.position.z = 100 + Math.cos(time / 1000) * 400;
+    Camera.angleY = -(Cursor.x - width / 2) / width / 2 * TAU;
+    Camera.angleX = -(Cursor.y - height / 2) / height / 2 * TAU;
+    const moveSpeed = 10;
+    if (Keys.isDown[',']) {
+      Camera.position.sumWith(1, Camera.forward, moveSpeed);
+    }
+    if (Keys.isDown['o']) {
+      Camera.position.sumWith(1, Camera.forward, -moveSpeed);
+    }
+    if (Keys.isDown['a']) {
+      Camera.position.sumWith(1, Camera.right, -moveSpeed);
+    }
+    if (Keys.isDown['e']) {
+      Camera.position.sumWith(1, Camera.right, moveSpeed);
+    }
+    if (Keys.isDown[' ']) {
+      Camera.position.sumWith(1, Camera.up, moveSpeed);
+    }
+    if (Keys.isDown['Shift']) {
+      Camera.position.sumWith(1, Camera.up, -moveSpeed);
+    }
     Camera.updateTransform();
     Frames.scheduleRedraw();
   }

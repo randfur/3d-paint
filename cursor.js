@@ -5,8 +5,11 @@ let listeners = [];
 export class Cursor {
   static x = width / 2;
   static y = height / 2;
+
   static isDown = false;
 
+  static dragStartX = 0;
+  static dragStartY = 0;
 
   static addListener(listener) {
     listeners.push(listener);
@@ -16,6 +19,8 @@ export class Cursor {
     Cursor.isDown = true;
     Cursor.x = event.clientX;
     Cursor.y = event.clientY;
+    Cursor.dragStartX = Cursor.x;
+    Cursor.dragStartY = Cursor.y;
     for (const listener of listeners) {
       maybeCall(listener.onCursorDown);
     }
