@@ -9,17 +9,19 @@ export class Keys {
     listeners.push(listener);
   }
 
-  static onDown({key}) {
-    Keys.isDown[key] = true;
+  static onDown(event) {
+    event.preventDefault();
+    Keys.isDown[event.code] = true;
     for (const listener of listeners) {
-      maybeCall(listener.onKeyDown, key);
+      maybeCall(listener.onKeyDown, event.code);
     }
   }
 
-  static onUp({key}) {
-    Keys.isDown[key] = false;
+  static onUp(event) {
+    event.preventDefault();
+    Keys.isDown[event.code] = false;
     for (const listener of listeners) {
-      maybeCall(listener.onKeyUp, key);
+      maybeCall(listener.onKeyUp, event.code);
     }
   }
 }

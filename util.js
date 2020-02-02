@@ -2,7 +2,7 @@ export const TAU = Math.PI * 2;
 export const width = window.innerWidth;
 export const height = window.innerHeight;
 
-let canvas = document.getElementById('canvas');
+export const canvas = document.getElementById('canvas');
 canvas.width = width;
 canvas.height = height;
 export const gl = canvas.getContext('webgl2');

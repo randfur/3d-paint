@@ -152,7 +152,7 @@ export class Surface {
     this.zAxis = new Vector(0, 0, 1);
     this.transformUpdated();
 
-    this.position = new Vector(deviate(1000), deviate(100), -100-random(1000));
+    this.position = new Vector(deviate(1000), 0, -100-random(1000));
 
     this.uploadTexture();
   }

@@ -24,7 +24,6 @@ export class Camera {
 
   static updateTransform() {
     Camera.orientation.reset();
-    Camera.orientation.rotateX(Camera.angleX);
     Camera.orientation.rotateY(Camera.angleY);
 
     Camera.forward.set(0, 0, -1);
@@ -80,25 +79,25 @@ export class Camera {
   }
 
   static onFrame(delta, time) {
-    Camera.angleY = -(Cursor.x - width / 2) / width / 2 * TAU;
-    Camera.angleX = -(Cursor.y - height / 2) / height / 2 * TAU;
+    // Camera.angleY = -(Cursor.x - width / 2) / width / 2 * TAU;
+    // Camera.angleX = -(Cursor.y - height / 2) / height / 2 * TAU;
     const moveSpeed = 10;
-    if (Keys.isDown[',']) {
+    if (Keys.isDown['KeyW']) {
       Camera.position.sumWith(1, Camera.forward, moveSpeed);
     }
-    if (Keys.isDown['o']) {
+    if (Keys.isDown['KeyS']) {
       Camera.position.sumWith(1, Camera.forward, -moveSpeed);
     }
-    if (Keys.isDown['a']) {
+    if (Keys.isDown['KeyA']) {
       Camera.position.sumWith(1, Camera.right, -moveSpeed);
     }
-    if (Keys.isDown['e']) {
+    if (Keys.isDown['KeyD']) {
       Camera.position.sumWith(1, Camera.right, moveSpeed);
     }
-    if (Keys.isDown[' ']) {
+    if (Keys.isDown['Space']) {
       Camera.position.sumWith(1, Camera.up, moveSpeed);
     }
-    if (Keys.isDown['Shift']) {
+    if (Keys.isDown['ShiftLeft'] || Keys.isDown['ShiftRight']) {
       Camera.position.sumWith(1, Camera.up, -moveSpeed);
     }
     Camera.updateTransform();
