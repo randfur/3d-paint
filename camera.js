@@ -97,7 +97,7 @@ export class Camera {
     if (Keys.isDown['Space']) {
       Camera.position.sumWith(1, Camera.up, moveSpeed);
     }
-    if (Keys.isDown['ShiftLeft'] || Keys.isDown['ShiftRight']) {
+    if (Keys.isDown['ShiftLeft']) {
       Camera.position.sumWith(1, Camera.up, -moveSpeed);
     }
     Camera.updateTransform();

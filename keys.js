@@ -10,7 +10,7 @@ export class Keys {
   }
 
   static onDown(event) {
-    event.preventDefault();
+    // event.preventDefault();
     Keys.isDown[event.code] = true;
     for (const listener of listeners) {
       maybeCall(listener.onKeyDown, event.code);
@@ -18,7 +18,7 @@ export class Keys {
   }
 
   static onUp(event) {
-    event.preventDefault();
+    // event.preventDefault();
     Keys.isDown[event.code] = false;
     for (const listener of listeners) {
       maybeCall(listener.onKeyUp, event.code);
