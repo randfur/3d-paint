@@ -1,5 +1,3 @@
-import {maybeCall} from './util.js';
-
 const listeners = [];
 
 export class Keys {
@@ -9,19 +7,28 @@ export class Keys {
     listeners.push(listener);
   }
 
+  static stripModifierSide(code) {
+    for (let modifier of ['Ctrl', 'Alt', 'Shift', 'Meta']) {
+      if (code.startsWith(modifier)) {
+        return modifier;
+      }
+    }
+    return code;
+  }
+
   static onDown(event) {
-    // event.preventDefault();
-    Keys.isDown[event.code] = true;
+    let code = Keys.stripModifierSide(event.code);
+    Keys.isDown[code] = true;
     for (const listener of listeners) {
-      maybeCall(listener.onKeyDown, event.code);
+      listener.onKeyDown?.(code);
     }
   }
 
   static onUp(event) {
-    // event.preventDefault();
-    Keys.isDown[event.code] = false;
+    let code = Keys.stripModifierSide(event.code);
+    Keys.isDown[code] = false;
     for (const listener of listeners) {
-      maybeCall(listener.onKeyUp, event.code);
+      listener.onKeyUp?.(code);
     }
   }
 }

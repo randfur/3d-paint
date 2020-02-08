@@ -87,6 +87,10 @@ export class Surface {
 
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+
+    gl.enable(gl.DEPTH_TEST);
+    gl.depthFunc(gl.GREATER);
+    gl.clearDepth(0);
   }
 
   static addListener(listener) {
@@ -143,6 +147,8 @@ export class Surface {
     gl.bindTexture(gl.TEXTURE_2D, this.texture);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 
     this.transform = new Matrix();
     this.transform.scale(this.canvas.width, this.canvas.height, 1);

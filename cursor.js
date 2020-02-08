@@ -1,4 +1,4 @@
-import {maybeCall, width, height} from './util.js';
+import {width, height} from './util.js';
 
 let listeners = [];
 
@@ -22,7 +22,7 @@ export class Cursor {
     Cursor.dragStartX = Cursor.x;
     Cursor.dragStartY = Cursor.y;
     for (const listener of listeners) {
-      maybeCall(listener.onCursorDown);
+      listener.onCursorDown?.();
     }
   }
 
@@ -31,7 +31,7 @@ export class Cursor {
     Cursor.x = event.clientX;
     Cursor.y = event.clientY;
     for (const listener of listeners) {
-      maybeCall(listener.onCursorUp);
+      listener.onCursorUp?.();
     }
   }
 
@@ -39,7 +39,7 @@ export class Cursor {
     Cursor.x = event.clientX;
     Cursor.y = event.clientY;
     for (const listener of listeners) {
-      maybeCall(listener.onCursorMove);
+      listener.onCursorMove?.();
     }
   }
 }
