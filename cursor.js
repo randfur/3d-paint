@@ -3,35 +3,44 @@ import {width, height} from './util.js';
 let listeners = [];
 
 export class Cursor {
+  static left = 0;
+  static right = 1;
+  static middle = 2;
+
   static x = width / 2;
   static y = height / 2;
 
-  static isDown = false;
+  static isDown = {};
 
   static dragStartX = 0;
   static dragStartY = 0;
+  static dragButton = null;
 
   static addListener(listener) {
     listeners.push(listener);
   }
 
   static onDown(event) {
-    Cursor.isDown = true;
     Cursor.x = event.clientX;
     Cursor.y = event.clientY;
     Cursor.dragStartX = Cursor.x;
     Cursor.dragStartY = Cursor.y;
+    Cursor.dragButton = event.button;
+    Cursor.isDown[event.button] = true;
     for (const listener of listeners) {
-      listener.onCursorDown?.();
+      listener.onCursorDown?.(event.button);
     }
   }
 
   static onUp(event) {
-    Cursor.isDown = false;
     Cursor.x = event.clientX;
     Cursor.y = event.clientY;
+    if (Cursor.dragButton == event.button) {
+      Cursor.dragButton = null;
+    }
+    Cursor.isDown[event.button] = true;
     for (const listener of listeners) {
-      listener.onCursorUp?.();
+      listener.onCursorUp?.(event.button);
     }
   }
 

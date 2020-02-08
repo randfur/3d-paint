@@ -197,7 +197,7 @@ export class Surface {
   }
 
   static onCursorRayMove(rayPosition, rayDirection) {
-    if (!Cursor.isDown || !selected) {
+    if (!Cursor.isDown[Cursor.left] || !selected) {
       return;
     }
     const canvasPosition = Vector.getTemp();
@@ -229,7 +229,7 @@ export class Surface {
     gl.bindVertexArray(shadePass.vertexArray);
     gl.depthMask(false);
     gl.uniformMatrix4fv(shadePass.locations.cameraTransform, true, Camera.transform.array);
-    for (let i = Surface.all.length / 2 | 0; 0 <=-- i;) {
+    for (let i = Surface.all.length; 0 <=-- i;) {
       Surface.all[i].drawShade();
     }
     gl.depthMask(true);
