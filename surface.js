@@ -1,4 +1,5 @@
 import {TAU, gl, logIf, width, height, random, deviate} from './util.js';
+import {Camera} from './camera.js';
 import {Vector} from './vector.js';
 import {Cursor} from './cursor.js';
 import {Matrix} from './matrix.js';
@@ -7,10 +8,24 @@ import {Frames} from './frames.js';
 const surfaceWidth = 400;
 const surfaceHeight = 400;
 
-let program = null;
-let colourLocation = null;
-let cameraTransformLocation = null;
-let surfaceTransformLocation = null;
+window.texturePass = {
+  program: null,
+  vertexArray: null,
+  locations: {
+    colour: null,
+    cameraTransform: null,
+    surfaceTransform: null,
+  },
+};
+
+window.shadePass = {
+  program: null,
+  vertexArray: null,
+  locations: {
+    cameraTransform: null,
+    surfaceTransform: null,
+  },
+};
 
 let listeners = [];
 
@@ -19,8 +34,8 @@ let selected = null;
 export class Surface {
   static all = [];
 
-  static init() {
-    program = gl.createProgram();
+  static initTexturePass() {
+    texturePass.program = gl.createProgram();
 
     const vertexShader = gl.createShader(gl.VERTEX_SHADER);
     gl.shaderSource(vertexShader, `#version 300 es
@@ -40,7 +55,7 @@ export class Surface {
     `);
     gl.compileShader(vertexShader);
     logIf(gl.getShaderInfoLog(vertexShader));
-    gl.attachShader(program, vertexShader);
+    gl.attachShader(texturePass.program, vertexShader);
 
     const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
     gl.shaderSource(fragmentShader, `#version 300 es
@@ -54,23 +69,28 @@ export class Surface {
     out vec4 col;
 
     void main() {
-      col = texture(sampler, fragPos).a * vec4(colour, 1) + vec4(0, 0, 0, 0.25);
-      // col = vec4(0, 0, 0, 1);
+      if (texture(sampler, fragPos).a == 0.0) {
+        discard;
+      }
+      col = vec4(colour, 1) + vec4(0, 0, 0, 0.25);
     }
     `);
     gl.compileShader(fragmentShader);
     logIf(gl.getShaderInfoLog(fragmentShader));
 
-    gl.attachShader(program, fragmentShader);
-    gl.linkProgram(program);
-    logIf(gl.getProgramInfoLog(program))
-    gl.useProgram(program);
+    gl.attachShader(texturePass.program, fragmentShader);
+    gl.linkProgram(texturePass.program);
+    logIf(gl.getProgramInfoLog(texturePass.program))
+    gl.useProgram(texturePass.program);
 
-    colourLocation = gl.getUniformLocation(program, 'colour');
-    cameraTransformLocation = gl.getUniformLocation(program, 'cameraTransform');
-    gl.uniformMatrix4fv(cameraTransformLocation, false, Matrix.identity.array);
-    surfaceTransformLocation = gl.getUniformLocation(program, 'surfaceTransform');
-    gl.uniformMatrix4fv(surfaceTransformLocation, false, Matrix.identity.array);
+    texturePass.vertexArray = gl.createVertexArray();
+    gl.bindVertexArray(texturePass.vertexArray);
+
+    texturePass.locations.colour = gl.getUniformLocation(texturePass.program, 'colour');
+    texturePass.locations.cameraTransform = gl.getUniformLocation(texturePass.program, 'cameraTransform');
+    gl.uniformMatrix4fv(texturePass.locations.cameraTransform, false, Matrix.identity.array);
+    texturePass.locations.surfaceTransform = gl.getUniformLocation(texturePass.program, 'surfaceTransform');
+    gl.uniformMatrix4fv(texturePass.locations.surfaceTransform, false, Matrix.identity.array);
 
     const buffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
@@ -81,9 +101,74 @@ export class Surface {
       0.5, -0.5,
     ]), gl.STATIC_DRAW);
 
-    const posAttribute = gl.getAttribLocation(program, 'pos');
+    const posAttribute = gl.getAttribLocation(texturePass.program, 'pos');
     gl.enableVertexAttribArray(posAttribute);
     gl.vertexAttribPointer(posAttribute, 2, gl.FLOAT, gl.FALSE, 4 * 2, 0);
+  }
+
+  static initShadePass() {
+    shadePass.program = gl.createProgram();
+
+    const vertexShader = gl.createShader(gl.VERTEX_SHADER);
+    gl.shaderSource(vertexShader, `#version 300 es
+    precision mediump float;
+
+    uniform mat4 cameraTransform;
+    uniform mat4 surfaceTransform;
+
+    in vec2 pos;
+
+    void main() {
+      gl_Position = cameraTransform * surfaceTransform * vec4(pos, 0, 1);
+    }
+    `);
+    gl.compileShader(vertexShader);
+    logIf(gl.getShaderInfoLog(vertexShader));
+    gl.attachShader(shadePass.program, vertexShader);
+
+    const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
+    gl.shaderSource(fragmentShader, `#version 300 es
+    precision mediump float;
+
+    out vec4 col;
+
+    void main() {
+      col = vec4(0, 0, 0, 0.25);
+    }
+    `);
+    gl.compileShader(fragmentShader);
+    logIf(gl.getShaderInfoLog(fragmentShader));
+
+    gl.attachShader(shadePass.program, fragmentShader);
+    gl.linkProgram(shadePass.program);
+    logIf(gl.getProgramInfoLog(shadePass.program))
+    gl.useProgram(shadePass.program);
+
+    shadePass.vertexArray = gl.createVertexArray();
+    gl.bindVertexArray(shadePass.vertexArray);
+
+    shadePass.locations.cameraTransform = gl.getUniformLocation(shadePass.program, 'cameraTransform');
+    gl.uniformMatrix4fv(shadePass.locations.cameraTransform, false, Matrix.identity.array);
+    shadePass.locations.surfaceTransform = gl.getUniformLocation(shadePass.program, 'surfaceTransform');
+    gl.uniformMatrix4fv(shadePass.locations.surfaceTransform, false, Matrix.identity.array);
+
+    const buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+      0.5, 0.5,
+      -0.5, 0.5,
+      -0.5, -0.5,
+      0.5, -0.5,
+    ]), gl.STATIC_DRAW);
+
+    const posAttribute = gl.getAttribLocation(shadePass.program, 'pos');
+    gl.enableVertexAttribArray(posAttribute);
+    gl.vertexAttribPointer(posAttribute, 2, gl.FLOAT, gl.FALSE, 4 * 2, 0);
+  }
+
+  static init() {
+    Surface.initTexturePass();
+    Surface.initShadePass();
 
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
@@ -127,11 +212,27 @@ export class Surface {
     Vector.releaseTemp(1);
   }
 
-  static draw(cameraTransform) {
-    gl.uniformMatrix4fv(cameraTransformLocation, true, cameraTransform.array);
+  static draw() {
+    Surface.all.sort((a, b) => {
+      return a.position.dot(Camera.eyeDirection) - b.position.dot(Camera.eyeDirection);
+    });
+
+    gl.useProgram(texturePass.program);
+    gl.bindVertexArray(texturePass.vertexArray);
+    gl.depthMask(true);
+    gl.uniformMatrix4fv(texturePass.locations.cameraTransform, true, Camera.transform.array);
     for (const surface of Surface.all) {
-      surface.draw();
+      surface.drawTexture();
     }
+
+    gl.useProgram(shadePass.program);
+    gl.bindVertexArray(shadePass.vertexArray);
+    gl.depthMask(false);
+    gl.uniformMatrix4fv(shadePass.locations.cameraTransform, true, Camera.transform.array);
+    for (let i = Surface.all.length / 2 | 0; 0 <=-- i;) {
+      Surface.all[i].drawShade();
+    }
+    gl.depthMask(true);
   }
 
   constructor() {
@@ -213,16 +314,25 @@ export class Surface {
     return null;
   }
 
-  draw() {
-    gl.useProgram(program);
+  drawTexture() {
     gl.bindTexture(gl.TEXTURE_2D, this.texture);
 
-    gl.uniform3fv(colourLocation, this.colour);
+    gl.uniform3fv(texturePass.locations.colour, this.colour);
 
     const transform = Matrix.getTemp();
     transform.assign(this.transform);
     transform.translate(this.position.x, this.position.y, this.position.z);
-    gl.uniformMatrix4fv(surfaceTransformLocation, true, transform.array);
+    gl.uniformMatrix4fv(texturePass.locations.surfaceTransform, true, transform.array);
+    Matrix.releaseTemp(1);
+
+    gl.drawArrays(gl.TRIANGLE_FAN, 0, 4);
+  }
+
+  drawShade() {
+    const transform = Matrix.getTemp();
+    transform.assign(this.transform);
+    transform.translate(this.position.x, this.position.y, this.position.z);
+    gl.uniformMatrix4fv(shadePass.locations.surfaceTransform, true, transform.array);
     Matrix.releaseTemp(1);
 
     gl.drawArrays(gl.TRIANGLE_FAN, 0, 4);

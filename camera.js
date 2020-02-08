@@ -17,6 +17,8 @@ export class Camera {
   static zViewportRatio = 2;
 
   static transform = new Matrix();
+  static eyeDirection = new Vector();
+
   static orientation = new Matrix();
   static forward = new Vector();
   static right = new Vector();
@@ -25,16 +27,6 @@ export class Camera {
   static cursorRayDirection = new Vector();
 
   static updateTransform() {
-    Camera.orientation.reset();
-    Camera.orientation.rotateY(Camera.angleY);
-
-    Camera.forward.set(0, 0, -1);
-    Camera.right.set(1, 0, 0);
-    Camera.up.set(0, 1, 0);
-    Camera.orientation.multiplyVectorRight(Camera.forward);
-    Camera.orientation.multiplyVectorRight(Camera.right);
-    Camera.orientation.multiplyVectorRight(Camera.up);
-
     Camera.transform.reset();
     Camera.transform.translate(
       -Camera.position.x,
@@ -46,6 +38,20 @@ export class Camera {
     Camera.transform.rotateX(-Camera.angleX);
 
     Camera.transform.frustum(Camera.zNear, Camera.zFar, Camera.zViewportRatio, width / height);
+
+    Camera.eyeDirection.set(0, 0, -1);
+    Camera.eyeDirection.rotateX(Camera.angleX);
+    Camera.eyeDirection.rotateY(Camera.angleY);
+
+    Camera.orientation.reset();
+    Camera.orientation.rotateY(Camera.angleY);
+
+    Camera.forward.set(0, 0, -1);
+    Camera.right.set(1, 0, 0);
+    Camera.up.set(0, 1, 0);
+    Camera.orientation.multiplyVectorRight(Camera.forward);
+    Camera.orientation.multiplyVectorRight(Camera.right);
+    Camera.orientation.multiplyVectorRight(Camera.up);
   }
 
   static addListener(listener) {

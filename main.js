@@ -13,7 +13,7 @@ function init() {
   Frames.init();
 
   Camera.position.set(0, 100, 300);
-  Camera.angleY = TAU * 0.05;
+  // Camera.angleY = TAU * 0.05;
   Camera.angleX = -TAU * 0.05;
   Camera.updateTransform();
 
@@ -45,7 +45,7 @@ function registerEvents() {
 function draw() {
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-  Surface.draw(Camera.transform);
+  Surface.draw();
   Hover.draw();
 }
 
