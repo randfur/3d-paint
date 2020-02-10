@@ -16,19 +16,21 @@ export class Keys {
     return code;
   }
 
-  static onDown(event) {
+  static onDown = Symbol();
+  static onDownEvent(event) {
     let code = Keys.stripModifierSide(event.code);
     Keys.isDown[code] = true;
     for (const listener of listeners) {
-      listener.onKeyDown?.(code);
+      listener[Keys.onDown]?.(code);
     }
   }
 
-  static onUp(event) {
+  static onUp = Symbol();
+  static onUpEvent(event) {
     let code = Keys.stripModifierSide(event.code);
     Keys.isDown[code] = false;
     for (const listener of listeners) {
-      listener.onKeyUp?.(code);
+      listener[Keys.onUp]?.(code);
     }
   }
 }

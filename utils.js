@@ -7,6 +7,12 @@ canvas.width = width;
 canvas.height = height;
 export const gl = canvas.getContext('webgl2');
 
+export function assert(condition, message) {
+  if (!condition) {
+    throw (message ?? 'Assertion failed');
+  }
+}
+
 export function logIf(text) {
   if (text != '') {
     console.log(text);

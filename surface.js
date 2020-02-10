@@ -1,9 +1,7 @@
-import {TAU, gl, logIf, width, height, random, deviate} from './util.js';
-import {Camera} from './camera.js';
-import {Vector} from './vector.js';
-import {Cursor} from './cursor.js';
-import {Matrix} from './matrix.js';
-import {Frames} from './frames.js';
+import {Camera} from './Camera.js';
+import {Matrix} from './Matrix.js';
+import {TAU, gl, logIf, width, height, random, deviate} from './utils.js';
+import {Vector} from './Vector.js';
 
 const surfaceWidth = 400;
 const surfaceHeight = 400;
@@ -28,8 +26,6 @@ window.shadePass = {
 };
 
 let listeners = [];
-
-let selected = null;
 
 export class Surface {
   static all = [];
@@ -180,36 +176,6 @@ export class Surface {
 
   static addListener(listener) {
     listeners.push(listener);
-  }
-
-  static onCursorRayDown(rayPosition, rayDirection) {
-    const canvasPosition = Vector.getTemp();
-    let smallestT = Infinity;
-    selected = null;
-    for (const surface of Surface.all) {
-      const t = surface.hitTest(rayPosition, rayDirection, canvasPosition);
-      if (t !== null && t < smallestT) {
-        selected = surface;
-        smallestT = t;
-      }
-    }
-    Vector.releaseTemp(1);
-  }
-
-  static onCursorRayMove(rayPosition, rayDirection) {
-    if (!Cursor.isDown[Cursor.left] || !selected) {
-      return;
-    }
-    const canvasPosition = Vector.getTemp();
-    if (selected.hitTest(rayPosition, rayDirection, canvasPosition) !== null) {
-      selected.context.fillRect(
-          Math.round(canvasPosition.x) - 5,
-          Math.round(canvasPosition.y) - 5,
-          10, 10);
-      selected.uploadTexture();
-      Frames.scheduleRedraw();
-    }
-    Vector.releaseTemp(1);
   }
 
   static draw() {

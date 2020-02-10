@@ -1,11 +1,9 @@
-import {logIf, TAU, width, height} from './util.js';
-import {Cursor} from './cursor.js';
-import {Keys} from './keys.js';
-import {Frames} from './frames.js';
-import {Matrix} from './matrix.js';
-import {Vector} from './vector.js';
-
-let listeners = [];
+import {Cursor} from './Cursor.js';
+import {Frames} from './Frames.js';
+import {Keys} from './Keys.js';
+import {logIf, TAU, width, height} from './utils.js';
+import {Matrix} from './Matrix.js';
+import {Vector} from './Vector.js';
 
 export class Camera {
   static position = new Vector();
@@ -54,10 +52,6 @@ export class Camera {
     Camera.orientation.multiplyVectorRight(Camera.up);
   }
 
-  static addListener(listener) {
-    listeners.push(listener);
-  }
-
   static updateCursorRayDirection() {
     const minScreenSide = Math.min(width, height);
     Camera.cursorRayDirection.set(
@@ -68,21 +62,15 @@ export class Camera {
     Camera.cursorRayDirection.rotateY(Camera.angleY);
   }
 
-  static onCursorDown() {
+  static [Cursor.onDown]() {
     Camera.updateCursorRayDirection();
-    for (const listener of listeners) {
-      listener.onCursorRayDown?.(Camera.position, Camera.cursorRayDirection);
-    }
   }
 
-  static onCursorMove() {
+  static [Cursor.onMove]() {
     Camera.updateCursorRayDirection();
-    for (const listener of listeners) {
-      listener.onCursorRayMove?.(Camera.position, Camera.cursorRayDirection);
-    }
   }
 
-  static onFrame(delta, time) {
+  static [Frames.onFrame](delta, time) {
     // Camera.angleY = -(Cursor.x - width / 2) / width / 2 * TAU;
     // Camera.angleX = -(Cursor.y - height / 2) / height / 2 * TAU;
     const moveSpeed = 10;

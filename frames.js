@@ -2,9 +2,11 @@ const listeners = [];
 
 export class Frames {
   static time = 0;
-  static redrawScheduled = false;
+  static redraw = null;
+  static redrawScheduled = true;
 
-  static init() {
+  static init(redraw) {
+    Frames.redraw = redraw;
     requestAnimationFrame(Frames.frame);
   }
 
@@ -12,17 +14,16 @@ export class Frames {
     listeners.push(listener);
   }
 
+  static onFrame = Symbol();
   static frame(newTime) {
     const delta = newTime - Frames.time;
     Frames.time = newTime;
     for (const listener of listeners) {
-      listener.onFrame?.(delta, Frames.time);
+      listener[Frames.onFrame]?.(delta, Frames.time);
     }
 
     if (Frames.redrawScheduled) {
-      for (const listener of listeners) {
-        listener.onRedraw?.();
-      }
+      Frames.redraw();
       Frames.redrawScheduled = false;
     }
     requestAnimationFrame(Frames.frame);
