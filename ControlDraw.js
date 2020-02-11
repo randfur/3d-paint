@@ -10,7 +10,8 @@ let selected = null;
 export class ControlDraw {
 
   static [Controls.handleCursorDown](button) {
-    if (button != Cursor.left) {
+    console.log(button);
+    if (button != Cursor.right) {
       return;
     }
 

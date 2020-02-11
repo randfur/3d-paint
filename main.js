@@ -1,5 +1,6 @@
 import {Camera} from './Camera.js';
 import {ControlDraw} from './ControlDraw.js';
+import {ControlCamera} from './ControlCamera.js';
 import {Controls} from './Controls.js';
 import {Cursor} from './Cursor.js';
 import {Debug} from './Debug.js';
@@ -33,6 +34,7 @@ function registerEvents() {
   window.addEventListener('mousemove', Cursor.onMoveEvent);
 
   Controls.add(ControlDraw);
+  Controls.add(ControlCamera);
 
   Cursor.addListener(Camera);
   Cursor.addListener(Controls);

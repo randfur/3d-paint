@@ -66,34 +66,11 @@ export class Camera {
     Camera.updateCursorRayDirection();
   }
 
-  static [Cursor.onMove]() {
+  static [Cursor.onDrag]() {
     Camera.updateCursorRayDirection();
   }
 
-  static [Frames.onFrame](delta, time) {
-    // Camera.angleY = -(Cursor.x - width / 2) / width / 2 * TAU;
-    // Camera.angleX = -(Cursor.y - height / 2) / height / 2 * TAU;
-    const moveSpeed = 10;
-    if (Keys.isDown['KeyW']) {
-      Camera.position.sumWith(1, Camera.forward, moveSpeed);
-    }
-    if (Keys.isDown['KeyS']) {
-      Camera.position.sumWith(1, Camera.forward, -moveSpeed);
-    }
-    if (Keys.isDown['KeyA']) {
-      Camera.position.sumWith(1, Camera.right, -moveSpeed);
-    }
-    if (Keys.isDown['KeyD']) {
-      Camera.position.sumWith(1, Camera.right, moveSpeed);
-    }
-    if (Keys.isDown['Space']) {
-      if (Keys.isDown['Shift']) {
-        Camera.position.sumWith(1, Camera.up, -moveSpeed);
-      } else {
-        Camera.position.sumWith(1, Camera.up, moveSpeed);
-      }
-    }
-    Camera.updateTransform();
-    Frames.scheduleRedraw();
+  static [Cursor.onMove]() {
+    Camera.updateCursorRayDirection();
   }
 }

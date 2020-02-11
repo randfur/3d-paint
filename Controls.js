@@ -25,31 +25,24 @@ export class Controls {
   }
 
   static handleCursorDrag = Symbol();
-  static handleCursorMove = Symbol();
-  static [Cursor.onMove]() {
-    const isHandlingCursor = Boolean(Controls.handlingCursor);
-    if (isHandlingCursor) {
-      Controls.handlingCursor[Controls.handleCursorDrag]?.();
-      return;
-    }
-    if (Cursor.dragButton !== null) {
-      return;
-    }
-    for (const control of Controls.all) {
-      if (control[Controls.handleCursorMove]?.() == Controls.consume) {
-        break;
-      }
-    }
+  static [Cursor.onDrag]() {
+    Controls.handlingCursor?.[Controls.handleCursorDrag]?.();
   }
 
-  static [Cursor.onUp](button) {
-    // TODO: Add handling code for drag end and cursor up if anything wants it.
+  static [Cursor.onDragEnd]() {
     Controls.handlingCursor = null;
   }
 
-  static [Frames.onFrame]() {
+  static [Cursor.onClick]() {
+    Controls.handlingCursor = null;
+  }
+
+  static handleFrame = Symbol();
+  static [Frames.onFrame](delta, time) {
     for (const control of Controls.all) {
-      control.handleFrame?.();
+      if (control[Controls.handleFrame]?.(delta, time) == Controls.consume) {
+        break;
+      }
     }
   }
 }
