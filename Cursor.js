@@ -4,9 +4,9 @@ let listeners = [];
 
 // TODO:
 // Event sequence graph:
-// Start -> onDown -> onClick -> Start
-//                 -> onDrag -> onDragEnd -> Start
-//       -> onMove -> Start
+// S -> onDown -> onClick -> S
+//             -> onDragStart -> onDrag -> onDragEnd -> S
+//   -> onMove -> S
 
 export class Cursor {
   static left = 0;
@@ -43,18 +43,26 @@ export class Cursor {
     }
   }
 
-  static onMove = Symbol();
+  static onDragStart = Symbol();
   static onDrag = Symbol();
+  static onMove = Symbol();
   static onMoveEvent(event) {
+    Cursor.x = event.clientX;
+    Cursor.y = event.clientY;
+
+    const wasDragging = Cursor.isDragging;
     if (Cursor.firstDownButton !== null) {
       Cursor.isDragging = true;
     }
     if (Cursor.isDragging) {
       Cursor.dragX += event.movementX;
       Cursor.dragY += event.movementY;
+      if (!wasDragging) {
+        for (const listener of listeners) {
+          listener[Cursor.onDragStart]?.(Cursor.firstDownButton);
+        }
+      }
     }
-    Cursor.x = event.clientX;
-    Cursor.y = event.clientY;
     for (const listener of listeners) {
       if (Cursor.isDragging) {
         listener[Cursor.onDrag]?.();

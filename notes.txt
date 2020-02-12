@@ -1,9 +1,8 @@
 Controls:
  - Camera move: WASD.
- - Camera look: Click drag to start, click to exit.
- - Highlight surface: Mouse over surface.
- - Select surfaces: Click surface, shift-click-drag for box select, shift-click surface to add.
- - Lock surface with camera move: Click hold surface and move.
- - Move surfaces in screen: Click drag surface.
- - Edit surfaces: Double click surface.
+ - Camera look: Right click drag.
+ - Highlight surface: Click surface surface.
+ - Select surfaces: Click surface.
+ - Move surfaces in screen: Click drag handle.
+ - Edit surfaces: Left click surface.
  - Rotate surfaces: Surface rotate handles.

@@ -9,7 +9,7 @@ let selected = null;
 
 export class ControlDraw {
 
-  static [Controls.handleCursorDown](button) {
+  static [Controls.handleCursorDragStart](button) {
     if (button != Cursor.left) {
       return;
     }

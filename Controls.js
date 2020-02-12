@@ -7,18 +7,27 @@ export class Controls {
 
   static all = [];
 
-  static handlingCursor = null;
+  static hanglingDrag = null;
 
   static add(control) {
     Controls.all.push(control);
   }
 
-  static handleCursorDown = Symbol();
-  static [Cursor.onDown](button) {
-    assert(!Controls.handlingCursor);
+  static handleCursorClick = Symbol();
+  static [Cursor.onClick](button) {
+    assert(!Controls.hanglingDrag);
     for (const control of Controls.all) {
-      if (control[Controls.handleCursorDown]?.(button) == Controls.consume) {
-        Controls.handlingCursor = control;
+      if (control[Controls.handleCursorClick]?.(button) == Controls.consume) {
+        break;
+      }
+    }
+  }
+
+  static handleCursorDragStart = Symbol();
+  static [Cursor.onDragStart](button) {
+    for (const control of Controls.all) {
+      if (control[Controls.handleCursorDragStart]?.(button) == Controls.consume) {
+        Controls.hanglingDrag = control;
         break;
       }
     }
@@ -26,15 +35,15 @@ export class Controls {
 
   static handleCursorDrag = Symbol();
   static [Cursor.onDrag]() {
-    Controls.handlingCursor?.[Controls.handleCursorDrag]?.();
+    Controls.hanglingDrag?.[Controls.handleCursorDrag]?.();
   }
 
+  static handleCursorDragEnd = Symbol();
   static [Cursor.onDragEnd]() {
-    Controls.handlingCursor = null;
-  }
-
-  static [Cursor.onClick]() {
-    Controls.handlingCursor = null;
+    if (Controls.hanglingDrag) {
+      Controls.hanglingDrag[Controls.handleCursorDragEnd]?.();
+      Controls.hanglingDrag = null;
+    }
   }
 
   static handleFrame = Symbol();

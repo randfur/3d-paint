@@ -9,7 +9,7 @@ let startAngleX = null;
 let startAngleY = null;
 
 export class ControlCamera {
-  static [Controls.handleCursorDown](button) {
+  static [Controls.handleCursorDragStart](button) {
     if (button == Cursor.right) {
       startAngleX = Camera.angleX;
       startAngleY = Camera.angleY;
