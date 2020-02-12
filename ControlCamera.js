@@ -10,7 +10,7 @@ let startAngleY = null;
 
 export class ControlCamera {
   static [Controls.handleCursorDown](button) {
-    if (button == Cursor.left) {
+    if (button == Cursor.right) {
       startAngleX = Camera.angleX;
       startAngleY = Camera.angleY;
       return Controls.consume;
@@ -40,10 +40,10 @@ export class ControlCamera {
     if (Keys.isDown['KeyD']) {
       Camera.position.sumWith(1, Camera.right, moveSpeed);
     }
-    if (Keys.isDown['Space'] && !Keys.isDown['Shift']) {
+    if (Keys.isDown['Space']) {
       Camera.position.sumWith(1, Camera.up, moveSpeed);
     }
-    if ((Keys.isDown['Space'] && Keys.isDown['Shift']) || Keys.isDown['KeyX']) {
+    if (Keys.isDown['Shift'] || Keys.isDown['KeyX']) {
       Camera.position.sumWith(1, Camera.up, -moveSpeed);
     }
     Camera.updateTransform();
