@@ -14,8 +14,7 @@ import {Vector} from './Vector.js';
 function init() {
   Frames.init(draw);
 
-  Camera.position.set(0, 100, 300);
-  // Camera.angleY = TAU * 0.05;
+  Camera.position.set(0, 400, 500);
   Camera.angleX = -TAU * 0.05;
   Camera.updateTransform();
 

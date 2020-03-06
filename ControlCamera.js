@@ -8,6 +8,11 @@ import {Controls} from './Controls.js';
 let startAngleX = null;
 let startAngleY = null;
 
+let targetAngleX = null;
+let targetAngleY = null;
+
+const targetAngleSmoothing = 1.2;
+
 export class ControlCamera {
   static [Controls.handleCursorDragStart](button) {
     if (button == Cursor.right) {
@@ -20,13 +25,16 @@ export class ControlCamera {
   static [Controls.handleCursorDrag]() {
     const pixelsPerRotation = 1000;
     const scale = TAU / pixelsPerRotation;
-    Camera.angleX = startAngleX - Cursor.dragY * scale;
-    Camera.angleY = startAngleY - Cursor.dragX * scale;
+    targetAngleX = startAngleX - Cursor.dragY * scale;
+    targetAngleY = startAngleY - Cursor.dragX * scale;
   }
 
   static [Controls.handleFrame](delta, time) {
-    // Camera.angleY = -(Cursor.x - width / 2) / width / 2 * TAU;
-    // Camera.angleX = -(Cursor.y - height / 2) / height / 2 * TAU;
+    if (targetAngleX !== null) {
+      Camera.angleX += (targetAngleX - Camera.angleX) / targetAngleSmoothing;
+      Camera.angleY += (targetAngleY - Camera.angleY) / targetAngleSmoothing;
+    }
+
     const moveSpeed = 10;
     if (Keys.isDown['KeyW']) {
       Camera.position.sumWith(1, Camera.forward, moveSpeed);
